@@ -30,11 +30,15 @@ const renderSpinner = function(){
 
 const showRecipe = async function(){
     try{
+        //Page load with id , window.location: nhận url hiện tại
+        const id = window.location.hash.slice(1)
+        if(!id) return;
+
         //0)Hiệu ứng load phần recipe
         renderSpinner()
 
         //1) Loading recipe
-        const res = await fetch("https://forkify-api.herokuapp.com/api/v2/recipes/5ed6604591c37cdc054bc886");
+        const res = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
         const data = await res.json();
         
         if(!res.ok)
@@ -149,7 +153,12 @@ const showRecipe = async function(){
     }
 }
 
-showRecipe()
+//Page load with id
+window.addEventListener('hashchange',showRecipe)
+window.addEventListener('load',showRecipe)
+
+
+
 
 if(module.hot){
     module.hot.accept()
