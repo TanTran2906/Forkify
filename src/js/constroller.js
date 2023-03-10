@@ -5,15 +5,6 @@ import 'core-js/stable'
 import 'regenerator-runtime/runtime'
 
 
-
-const timeout = function (s) {
-  return new Promise(function (_, reject) {
-    setTimeout(function () {
-      reject(new Error(`Request took too long! Timeout after ${s} second`));
-    }, s * 1000);
-  });
-};
-
 // https://forkify-api.herokuapp.com/v2 --> Lấy url API
 
 ///////////////////////////////////////
@@ -36,14 +27,16 @@ const controllerRecipe = async function(){
         
     }
     catch(err){
-        console.error(err)
+        recipeView.renderError()
+        console.error(`${err} 🔥🔥🔥`)
     }
 }
 
 //Page load with id
-window.addEventListener('hashchange',controllerRecipe)
-window.addEventListener('load',controllerRecipe)
-
+const init = function(){
+  recipeView.addHandleRender(controllerRecipe)
+}
+init()
 
 
 

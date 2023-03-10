@@ -4,6 +4,8 @@ import fracty from 'fracty' //npm library chuyển từ số hữu tỉ sang ph�
 class RecipeView{
     #parentElement = document.querySelector('.recipe');
     #data;
+    #message = '';
+    #errorMessage = 'We could not find the recipe. Please try another one!';
 
     render(data){
         this.#data = data
@@ -17,8 +19,8 @@ class RecipeView{
         this.#parentElement.innerHTML=''  
     }
 
-    renderSpinner = function(){
-        const marker = `
+    renderSpinner(){
+        const markup = `
         <div class="spinner">
             <svg>
                 <use href="${icons}#icon-loader"></use>
@@ -26,7 +28,44 @@ class RecipeView{
         </div>
         `;
         this.#clear()
-        this.#parentElement.insertAdjacentHTML('afterbegin',marker)
+        this.#parentElement.insertAdjacentHTML('afterbegin',markup)
+    }
+
+    renderError(message = this.#errorMessage){
+        const markup = `
+        <div class="error">
+            <div>
+              <svg>
+                <use href= "${icons}#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+        </div> 
+        `
+        this.#clear()
+        this.#parentElement.insertAdjacentHTML('afterbegin',markup)
+    }
+
+    //Trong tương lai có thể cần dùng đến
+    renderMessage(message = this.#message){
+        const markup = `
+        <div class="message">
+            <div>
+              <svg>
+                <use href= "${icons}#icon-smile"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+        </div>
+        `
+        this.#clear()
+        this.#parentElement.insertAdjacentHTML('afterbegin',markup)
+    }
+
+    //Page load with id
+    addHandleRender(handle){
+        window.addEventListener('hashchange',handle)
+        window.addEventListener('load',handle)
     }
 
     #generateMarkup(){

@@ -564,13 +564,6 @@ var _modelJs = require("./model.js");
 var _recipeViewJs = require("./views/recipeView.js"); // recipeView : giờ đây là 1 thể hiện(đối tượng)
 var _recipeViewJsDefault = parcelHelpers.interopDefault(_recipeViewJs);
 var _runtime = require("regenerator-runtime/runtime");
-const timeout = function(s) {
-    return new Promise(function(_, reject) {
-        setTimeout(function() {
-            reject(new Error(`Request took too long! Timeout after ${s} second`));
-        }, s * 1000);
-    });
-};
 // https://forkify-api.herokuapp.com/v2 --> Lấy url API
 ///////////////////////////////////////
 const controllerRecipe = async function() {
@@ -585,15 +578,18 @@ const controllerRecipe = async function() {
         //2)Rendering recipe
         (0, _recipeViewJsDefault.default).render(_modelJs.state.recipe);
     } catch (err) {
-        console.error(err);
+        (0, _recipeViewJsDefault.default).renderError();
+        console.error(`${err} 🔥🔥🔥`);
     }
 };
 //Page load with id
-window.addEventListener("hashchange", controllerRecipe);
-window.addEventListener("load", controllerRecipe);
+const init = function() {
+    (0, _recipeViewJsDefault.default).addHandleRender(controllerRecipe);
+};
+init();
 if (module.hot) module.hot.accept();
 
-},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","regenerator-runtime/runtime":"dXNgZ","./model.js":"Y4A21","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./views/recipeView.js":"l60JC"}],"gSXXb":[function(require,module,exports) {
+},{"core-js/modules/es.regexp.flags.js":"gSXXb","core-js/modules/web.immediate.js":"49tUX","./model.js":"Y4A21","./views/recipeView.js":"l60JC","regenerator-runtime/runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gSXXb":[function(require,module,exports) {
 var global = require("acf63f3b822e7a22");
 var DESCRIPTORS = require("58a9e2260ddc6cf8");
 var defineBuiltInAccessor = require("5c8fb86640b5653");
@@ -1982,7 +1978,38 @@ module.exports = function(scheduler, hasTimeArg) {
 },{"d34b85f0fa47d24c":"i8HOC","ec194bfa18a9d160":"148ka","f5b1341e2c536839":"l3Kyn","3aa219dcae5c0ff1":"2BA6V","b0e68b3cbcad0450":"73xBt","5bb3d6fade5b7079":"RsFXo","6211ec567718f00b":"b9O3D"}],"2BA6V":[function(require,module,exports) {
 /* global Bun -- Deno case */ module.exports = typeof Bun == "function" && Bun && typeof Bun.version == "string";
 
-},{}],"dXNgZ":[function(require,module,exports) {
+},{}],"Y4A21":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "state", ()=>state);
+parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
+var _regeneratorRuntime = require("regenerator-runtime"); //Tự sinh ra khi dùng async
+var _configJs = require("./config.js");
+var _helpers = require("./helpers");
+const state = {
+    recipe: {}
+};
+const loadRecipe = async function(id) {
+    try {
+        const data = await (0, _helpers.getJSON)(`${(0, _configJs.API_URL)}${id}`);
+        //Sửa lại các key của object của data trả về cho dễ sử dụng
+        const { recipe  } = data.data;
+        state.recipe = {
+            id: recipe.id,
+            title: recipe.title,
+            publisher: recipe.publisher,
+            sourceUrl: recipe.source_url,
+            image: recipe.image_url,
+            servings: recipe.servings,
+            cookingTime: recipe.cooking_time,
+            ingredients: recipe.ingredients
+        };
+    } catch (err) {
+        throw err;
+    }
+};
+
+},{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","./helpers":"hGI1E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"dXNgZ":[function(require,module,exports) {
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -2569,38 +2596,16 @@ try {
     else Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-},{}],"Y4A21":[function(require,module,exports) {
+},{}],"k5Hzs":[function(require,module,exports) {
+//File chứa các hằng số dùng chung cho toàn project
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "state", ()=>state);
-parcelHelpers.export(exports, "loadRecipe", ()=>loadRecipe);
-var _regeneratorRuntime = require("regenerator-runtime"); //Tự sinh ra khi dùng async
-const state = {
-    recipe: {}
-};
-const loadRecipe = async function(id) {
-    try {
-        const res = await fetch(`https://forkify-api.herokuapp.com/api/v2/recipes/${id}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(`${data.message} ${data.status}`);
-        //Sửa lại các key của object của data trả về cho dễ sử dụng
-        const { recipe  } = data.data;
-        state.recipe = {
-            id: recipe.id,
-            title: recipe.title,
-            publisher: recipe.publisher,
-            sourceUrl: recipe.source_url,
-            image: recipe.image_url,
-            servings: recipe.servings,
-            cookingTime: recipe.cooking_time,
-            ingredients: recipe.ingredients
-        };
-    } catch (err) {
-        console.error(err);
-    }
-};
+parcelHelpers.export(exports, "API_URL", ()=>API_URL);
+parcelHelpers.export(exports, "TIME_OUT_SECOND", ()=>TIME_OUT_SECOND);
+const API_URL = "https://forkify-api.herokuapp.com/api/v2/recipes/";
+const TIME_OUT_SECOND = 10;
 
-},{"regenerator-runtime":"dXNgZ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -2630,7 +2635,36 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"l60JC":[function(require,module,exports) {
+},{}],"hGI1E":[function(require,module,exports) {
+//File chứa chức năng dùng chung
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "getJSON", ()=>getJSON);
+parcelHelpers.export(exports, "timeout", ()=>timeout);
+var _regeneratorRuntime = require("regenerator-runtime");
+var _configJs = require("./config.js");
+const getJSON = async function(url) {
+    try {
+        const res = await Promise.race([
+            fetch(url),
+            timeout((0, _configJs.TIME_OUT_SECOND))
+        ]);
+        const data = await res.json();
+        if (!res.ok) throw new Error(`${data.message} ${data.status}`);
+        return data; //Trả về Promise nên cần await
+    } catch (err) {
+        throw err;
+    }
+};
+const timeout = function(s) {
+    return new Promise(function(_, reject) {
+        setTimeout(function() {
+            reject(new Error(`Request took too long! Timeout after ${s} second`));
+        }, s * 1000);
+    });
+};
+
+},{"regenerator-runtime":"dXNgZ","./config.js":"k5Hzs","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"l60JC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _iconsSvg = require("url:../../img/icons.svg"); //Phải import vì parcel hiểu nó là tệp lệnh chứ không phải ảnh
@@ -2640,6 +2674,8 @@ var _fractyDefault = parcelHelpers.interopDefault(_fracty);
 class RecipeView {
     #parentElement = document.querySelector(".recipe");
     #data;
+    #message = "";
+    #errorMessage = "We could not find the recipe. Please try another one!";
     render(data) {
         this.#data = data;
         const markup = this.#generateMarkup();
@@ -2649,8 +2685,8 @@ class RecipeView {
     #clear() {
         this.#parentElement.innerHTML = "";
     }
-    renderSpinner = function() {
-        const marker = `
+    renderSpinner() {
+        const markup = `
         <div class="spinner">
             <svg>
                 <use href="${(0, _iconsSvgDefault.default)}#icon-loader"></use>
@@ -2658,8 +2694,42 @@ class RecipeView {
         </div>
         `;
         this.#clear();
-        this.#parentElement.insertAdjacentHTML("afterbegin", marker);
-    };
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    renderError(message = this.#errorMessage) {
+        const markup = `
+        <div class="error">
+            <div>
+              <svg>
+                <use href= "${(0, _iconsSvgDefault.default)}#icon-alert-triangle"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+        </div> 
+        `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    //Trong tương lai có thể cần dùng đến
+    renderMessage(message = this.#message) {
+        const markup = `
+        <div class="message">
+            <div>
+              <svg>
+                <use href= "${(0, _iconsSvgDefault.default)}#icon-smile"></use>
+              </svg>
+            </div>
+            <p>${message}</p>
+        </div>
+        `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    //Page load with id
+    addHandleRender(handle) {
+        window.addEventListener("hashchange", handle);
+        window.addEventListener("load", handle);
+    }
     #generateMarkup() {
         return `
             <figure class="recipe__fig">
@@ -2750,7 +2820,7 @@ class RecipeView {
 }
 exports.default = new RecipeView();
 
-},{"url:../../img/icons.svg":"esTiw","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","fracty":"hJO4d"}],"esTiw":[function(require,module,exports) {
+},{"url:../../img/icons.svg":"esTiw","fracty":"hJO4d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"esTiw":[function(require,module,exports) {
 module.exports = require("2abb48f2d3cbcef").getBundleURL("4xwTN") + "icons.dfd7a6db.svg" + "?" + Date.now();
 
 },{"2abb48f2d3cbcef":"lgJ39"}],"lgJ39":[function(require,module,exports) {
